@@ -44,11 +44,15 @@ public static class ContractMapping
         };
     }
 
-    public static MoviesResponse MapToResponse(this IEnumerable<Movie> movies)
+    public static MoviesResponse MapToResponse(this IEnumerable<Movie> movies, int page, int pageSize, int totalCount)
     {
         return new MoviesResponse
         {
-            Items = movies.Select(m => m.MapToResponse())
+            Items = movies.Select(m => m.MapToResponse()),
+            Page = page,
+            PageSize = pageSize,
+            Total = totalCount,
+            HasNextPage = page * pageSize < totalCount
         };
     }
 
