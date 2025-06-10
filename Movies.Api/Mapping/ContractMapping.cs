@@ -80,7 +80,9 @@ public static class ContractMapping
             YearOfRelease = request.Year,
             SortField = request.SortBy?.Trim('+', '-', ' '),
             SortOrder = request.SortBy is null ? SortOrder.Unsorted :
-                         request.SortBy.StartsWith('-') ? SortOrder.Descending : SortOrder.Ascending
+                         request.SortBy.StartsWith('-') ? SortOrder.Descending : SortOrder.Ascending,
+            Page = request.Page,
+            PageSize = request.PageSize
         };
     }
 
