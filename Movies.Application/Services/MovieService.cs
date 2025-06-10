@@ -28,11 +28,20 @@ public class MovieService : IMovieService
     }
 
 
-    public async Task<IEnumerable<Movie>> GetAllAsync(GetAllMoviesOptions options, CancellationToken cancellationToken = default)
+    public async Task<PagedResult<Movie>> GetAllAsync(GetAllMoviesOptions options, CancellationToken cancellationToken = default)
     {
         await _optionsValidator.ValidateAndThrowAsync(options, cancellationToken);
 
-        return await _movieRepository.GetAllAsync(options, cancellationToken);
+        var movies = await _movieRepository.GetAllAsync(options, cancellationToken);
+        var totalCount = await _movieRepository.GetCountAsync(options, cancellationToken);
+
+        return new PagedResult<Movie>
+        {
+            Items = movies,
+            Page = options.Page,
+            PageSize = options.PageSize,
+            Total = totalCount
+        };
     }
 
     public Task<Movie?> GetByIdAsync(Guid id, Guid? userId = default, CancellationToken cancellationToken = default)
