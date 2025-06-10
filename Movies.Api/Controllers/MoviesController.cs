@@ -37,8 +37,8 @@ namespace Movies.Api.Controllers
             var userId = HttpContext.GetUserId();
             var options = moviesRequest.MapToOptions().WithUserId(userId);
             
-            var movies = await _movieService.GetAllAsync(options, cancellationToken);
-            var response = movies.MapToResponse();
+            var pagedResult = await _movieService.GetAllAsync(options, cancellationToken);
+            var response = pagedResult.MapToResponse();
             return Ok(response);
         }
 
