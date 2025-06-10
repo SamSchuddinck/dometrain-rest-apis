@@ -33,11 +33,14 @@ namespace Movies.Api.Controllers
         [HttpGet(ApiEndpoints.Movies.GetAll)]
         public async Task<IActionResult> GetAll([FromQuery] GetAllMoviesRequest moviesRequest, CancellationToken cancellationToken)
         {
-
             var userId = HttpContext.GetUserId();
             var options = moviesRequest.MapToOptions().WithUserId(userId);
             
-            var response = await _movieService.GetAllAsync(options, cancellationToken);
+            var movies = await _movieService.GetAllAsync(options, cancellationToken);
+            var totalCount = await _movieService.GetCountAsync(options, cancellationToken);
+            
+            var response = movies.MapToResponse(options.Page, options.PageSize, totalCount);
+            
             return Ok(response);
         }
 
