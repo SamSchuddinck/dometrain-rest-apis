@@ -2,7 +2,8 @@ using System;
 
 namespace Movies.Contracts.Responses;
 
-public class MoviesResponse
+public class MoviesResponse : PagedResponse<MovieResponse>
 {
-    public required IEnumerable<MovieResponse> Items { get; init; } = Enumerable.Empty<MovieResponse>();
+    // Inherits all pagination properties from PagedResponse<MovieResponse>
+    // Items, Page, PageSize, Total, HasNextPage
 }

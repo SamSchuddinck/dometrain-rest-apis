@@ -1,5 +1,6 @@
 using System;
 using Movies.Application.Models;
+using Movies.Contracts.Responses;
 
 namespace Movies.Application.Services;
 
@@ -9,7 +10,7 @@ public interface IMovieService
     Task<bool> CreateAsync(Movie movie, CancellationToken cancellationToken = default);
     Task<Movie?> GetByIdAsync(Guid id, Guid? userId = default, CancellationToken cancellationToken = default);
     Task<Movie?> GetBySlugAsync(string slug, Guid? userId = default, CancellationToken cancellationToken = default);
-    Task<PagedResult<Movie>> GetAllAsync(GetAllMoviesOptions moviesOptions, CancellationToken cancellationToken = default);
+    Task<MoviesResponse> GetAllAsync(GetAllMoviesOptions moviesOptions, CancellationToken cancellationToken = default);
     Task<Movie?> UpdateAsync(Movie movie, Guid? userId = default, CancellationToken cancellationToken = default);
     Task<bool> DeleteByIdAsync(Guid id, CancellationToken cancellationToken = default);
 }

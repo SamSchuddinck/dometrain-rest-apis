@@ -52,18 +52,6 @@ public static class ContractMapping
         };
     }
 
-    public static PagedResponse<MovieResponse> MapToResponse(this PagedResult<Movie> pagedResult)
-    {
-        return new PagedResponse<MovieResponse>
-        {
-            Items = pagedResult.Items.Select(m => m.MapToResponse()),
-            Page = pagedResult.Page,
-            PageSize = pagedResult.PageSize,
-            Total = pagedResult.Total,
-            HasNextPage = pagedResult.HasNextPage
-        };
-    }
-
     public static MovieRatingResponse MapToResponse(this MovieRating movieRating)
     {
         return new MovieRatingResponse

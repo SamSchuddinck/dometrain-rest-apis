@@ -2,6 +2,7 @@ using System;
 using FluentValidation;
 using Movies.Application.Models;
 using Movies.Application.Repositories;
+using Movies.Contracts.Responses;
 
 namespace Movies.Application.Services;
 
@@ -28,19 +29,29 @@ public class MovieService : IMovieService
     }
 
 
-    public async Task<PagedResult<Movie>> GetAllAsync(GetAllMoviesOptions options, CancellationToken cancellationToken = default)
+    public async Task<MoviesResponse> GetAllAsync(GetAllMoviesOptions options, CancellationToken cancellationToken = default)
     {
         await _optionsValidator.ValidateAndThrowAsync(options, cancellationToken);
 
         var movies = await _movieRepository.GetAllAsync(options, cancellationToken);
         var totalCount = await _movieRepository.GetCountAsync(options, cancellationToken);
 
-        return new PagedResult<Movie>
+        return new MoviesResponse
         {
-            Items = movies,
+            Items = movies.Select(movie => new MovieResponse
+            {
+                Id = movie.Id,
+                Title = movie.Title,
+                Slug = movie.Slug,
+                YearOfRelease = movie.YearOfRelease,
+                Rating = movie.Rating,
+                UserRating = movie.UserRating,
+                Genres = movie.Genres
+            }),
             Page = options.Page,
             PageSize = options.PageSize,
-            Total = totalCount
+            Total = totalCount,
+            HasNextPage = options.Page * options.PageSize < totalCount
         };
     }
 
