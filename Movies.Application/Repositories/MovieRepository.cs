@@ -51,6 +51,8 @@ public class MovieRepository : IMovieRepository
         {
             orderClause = $""", movies.{moviesOptions.SortField} ORDER BY {moviesOptions.SortField} {(moviesOptions.SortOrder == SortOrder.Ascending ? "ASC" : "DESC")}""";
         }
+
+        var pageOffset = (moviesOptions.Page - 1) * moviesOptions.PageSize;
         
         var result = await connection.QueryAsync(new CommandDefinition($"""
 
@@ -64,11 +66,14 @@ public class MovieRepository : IMovieRepository
         WHERE (@title IS NULL OR movies.title ILIKE ('%' || @title || '%'))
         AND (@yearOfRelease IS NULL OR movies.year_of_release = @yearOfRelease)
         GROUP BY movies.id, userrating {orderClause}
+        LIMIT @pageSize OFFSET @pageOffset
         """, new
         {
             userId = moviesOptions.UserId,
             title = moviesOptions.Title,
-            yearOfRelease = moviesOptions.YearOfRelease
+            yearOfRelease = moviesOptions.YearOfRelease,
+            pageSize = moviesOptions.PageSize,
+            pageOffset = pageOffset
         }, cancellationToken: cancellationToken));
 
         return result.Select(dbMovie => new Movie
