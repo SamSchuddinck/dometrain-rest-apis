@@ -5,7 +5,6 @@ using Movies.Application.Repositories;
 using Movies.Contracts.Responses;
 
 namespace Movies.Application.Services;
-
 public class MovieService : IMovieService
 {
     private readonly IMovieRepository _movieRepository;
@@ -29,30 +28,16 @@ public class MovieService : IMovieService
     }
 
 
-    public async Task<MoviesResponse> GetAllAsync(GetAllMoviesOptions options, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<Movie>> GetAllAsync(GetAllMoviesOptions options, CancellationToken cancellationToken = default)
     {
         await _optionsValidator.ValidateAndThrowAsync(options, cancellationToken);
+        return await _movieRepository.GetAllAsync(options, cancellationToken);
+    }
 
-        var movies = await _movieRepository.GetAllAsync(options, cancellationToken);
-        var totalCount = await _movieRepository.GetCountAsync(options, cancellationToken);
-
-        return new MoviesResponse
-        {
-            Items = movies.Select(movie => new MovieResponse
-            {
-                Id = movie.Id,
-                Title = movie.Title,
-                Slug = movie.Slug,
-                YearOfRelease = movie.YearOfRelease,
-                Rating = movie.Rating,
-                UserRating = movie.UserRating,
-                Genres = movie.Genres
-            }),
-            Page = options.Page,
-            PageSize = options.PageSize,
-            Total = totalCount,
-            HasNextPage = options.Page * options.PageSize < totalCount
-        };
+    public async Task<int> GetCountAsync(GetAllMoviesOptions options, CancellationToken cancellationToken = default)
+    {
+        await _optionsValidator.ValidateAndThrowAsync(options, cancellationToken);
+        return await _movieRepository.GetCountAsync(options, cancellationToken);
     }
 
     public Task<Movie?> GetByIdAsync(Guid id, Guid? userId = default, CancellationToken cancellationToken = default)
