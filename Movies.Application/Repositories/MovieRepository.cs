@@ -88,6 +88,25 @@ public class MovieRepository : IMovieRepository
 
     }
 
+    public async Task<int> GetCountAsync(GetAllMoviesOptions moviesOptions, CancellationToken cancellationToken = default)
+    {
+        using var connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
+        
+        var result = await connection.ExecuteScalarAsync<int>(new CommandDefinition("""
+        SELECT COUNT(DISTINCT movies.id)
+        FROM movies
+        LEFT JOIN genres genres ON movies.id = genres.movieid
+        WHERE (@title IS NULL OR movies.title ILIKE ('%' || @title || '%'))
+        AND (@yearOfRelease IS NULL OR movies.year_of_release = @yearOfRelease)
+        """, new
+        {
+            title = moviesOptions.Title,
+            yearOfRelease = moviesOptions.YearOfRelease
+        }, cancellationToken: cancellationToken));
+
+        return result;
+    }
+
     public async Task<Movie?> GetByIdAsync(Guid id, Guid? userId = default, CancellationToken cancellationToken = default)
     {
         using var connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
