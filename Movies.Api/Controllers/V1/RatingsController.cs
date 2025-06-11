@@ -6,9 +6,10 @@ using Movies.Api.Mapping;
 using Movies.Application.Services;
 using Movies.Contracts.Requests;
 
-namespace Movies.Api.Controllers;
+namespace Movies.Api.Controllers.V1;
 
 [ApiController]
+[ApiVersion("1.0")]
 public class RatingController : ControllerBase
 {
     private readonly IRatingService _ratingService;

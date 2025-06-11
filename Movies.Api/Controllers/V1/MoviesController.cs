@@ -8,10 +8,11 @@ using Movies.Application.Services;
 using Movies.Contracts.Requests;
 using Movies.Contracts.Responses;
 
-namespace Movies.Api.Controllers
+namespace Movies.Api.Controllers.V1
 {
 
     [ApiController]
+    [ApiVersion("1.0")]
     public class MoviesController : ControllerBase
     {
         private readonly IMovieService _movieService;
@@ -43,6 +44,7 @@ namespace Movies.Api.Controllers
             
             return Ok(response);
         }
+
 
         [HttpGet(ApiEndpoints.Movies.Get)]
         public async Task<IActionResult> Get([FromRoute] string idOrSlug, CancellationToken cancellationToken)
