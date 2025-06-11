@@ -31,6 +31,12 @@ namespace Movies.Api.Controllers.V1
             return CreatedAtAction(nameof(Get), new { idOrSlug = movie.Id }, movie.MapToResponse());
         }
 
+        /// <summary>
+        /// Retrieves a paginated list of movies based on query parameters and the current user's context.
+        /// </summary>
+        /// <param name="moviesRequest">Query parameters for filtering, sorting, and pagination.</param>
+        /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+        /// <returns>A 200 OK response containing the paginated list of movies.</returns>
         [HttpGet(ApiEndpoints.Movies.GetAll)]
         public async Task<IActionResult> GetAll([FromQuery] GetAllMoviesRequest moviesRequest, CancellationToken cancellationToken)
         {
@@ -46,6 +52,14 @@ namespace Movies.Api.Controllers.V1
         }
 
 
+        /// <summary>
+                /// Retrieves a movie by its unique identifier or slug.
+                /// </summary>
+                /// <param name="idOrSlug">The movie's GUID or slug.</param>
+                /// <param name="cancellationToken">Token to cancel the operation.</param>
+                /// <returns>
+                /// 200 OK with the movie details if found; otherwise, 404 Not Found.
+                /// </returns>
         [HttpGet(ApiEndpoints.Movies.Get)]
         public async Task<IActionResult> Get([FromRoute] string idOrSlug, CancellationToken cancellationToken)
         {
