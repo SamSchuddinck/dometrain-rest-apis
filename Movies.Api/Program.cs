@@ -1,5 +1,8 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.IdentityModel.Tokens;
 using Movies.Api;
 using Movies.Api.Mapping;
@@ -37,11 +40,19 @@ builder.Services.AddAuthorization(options =>
 
     options.AddPolicy(AuthContstants.TrusterMemberPolicyName, policy =>
     {
-        policy.RequireAssertion(c => 
-            c.User.HasClaim(AuthContstants.TrusterMemberClaimName,"true") ||
+        policy.RequireAssertion(c =>
+            c.User.HasClaim(AuthContstants.TrusterMemberClaimName, "true") ||
             c.User.HasClaim(AuthContstants.AdminUserClaimName, "true")
-        );    
+        );
     });
+});
+
+builder.Services.AddApiVersioning(options =>
+{
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.ReportApiVersions = true;
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ApiVersionReader = new MediaTypeApiVersionReader("api-version");
 });
 
 // Add services to the container.
