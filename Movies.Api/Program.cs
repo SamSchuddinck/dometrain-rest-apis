@@ -1,22 +1,26 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Versioning;
+using Asp.Versioning;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Movies.Api;
 using Movies.Api.Mapping;
+using Movies.Api.Swagger;
 using Movies.Application;
 using Movies.Application.Database;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
+
+// Add services to the container.
+// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+// builder.Services.AddOpenApi();
 
 builder.Services.AddAuthentication(authConfig =>
 {
     authConfig.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
     authConfig.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    authConfig.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(tokenConfig =>
 {
     tokenConfig.TokenValidationParameters = new TokenValidationParameters
@@ -47,20 +51,20 @@ builder.Services.AddAuthorization(options =>
     });
 });
 
+// Configure API Versioning
 builder.Services.AddApiVersioning(options =>
 {
     options.DefaultApiVersion = new ApiVersion(1, 0);
     options.ReportApiVersions = true;
     options.AssumeDefaultVersionWhenUnspecified = true;
     options.ApiVersionReader = new MediaTypeApiVersionReader("api-version");
-});
+}).AddMvc().AddApiExplorer();
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+//builder.Services.AddResponseCaching();
 
 builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
+builder.Services.AddSwaggerGen(x => x.OperationFilter<SwaggerDefaultValues>());
 builder.Services.AddApplication();
 builder.Services.AddDatabase(config["Database:ConnectionString"]!);
 
@@ -69,7 +73,17 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+{
+    foreach (var description in app.DescribeApiVersions())
+    {
+        options.SwaggerEndpoint(
+            $"/swagger/{description.GroupName}/swagger.json",
+            $"Movies API {description.ApiVersion}");
+    }
+    options.RoutePrefix = String.Empty;
+});
 }
 
 app.UseHttpsRedirection();

@@ -10,10 +10,10 @@ namespace Movies.Api.Controllers.V1;
 
 [ApiController]
 [ApiVersion("1.0")]
-public class RatingController : ControllerBase
+public class RatingsController : ControllerBase
 {
     private readonly IRatingService _ratingService;
-    public RatingController(IRatingService ratingService)
+    public RatingsController(IRatingService ratingService)
     {
         _ratingService = ratingService;
     }
