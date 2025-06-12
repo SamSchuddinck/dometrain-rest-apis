@@ -37,16 +37,17 @@ namespace Movies.Api.Controllers.V1
         [HttpGet(ApiEndpoints.Movies.GetAll)]
         [ProducesResponseType(typeof(PagedResponse<MovieResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ValidationFailureResponse), StatusCodes.Status400BadRequest)]
+        // [ResponseCache(Duration = 30, VaryByQueryKeys = new[] { "title", "year", "sortBy", "page", "pageSize" }, VaryByHeader = "Accept, Accept-Encoding", Location = ResponseCacheLocation.Any)]
         public async Task<IActionResult> GetAll([FromQuery] GetAllMoviesRequest moviesRequest, CancellationToken cancellationToken)
         {
             var userId = HttpContext.GetUserId();
             var options = moviesRequest.MapToOptions().WithUserId(userId);
-            
+
             var movies = await _movieService.GetAllAsync(options, cancellationToken);
             var totalCount = await _movieService.GetCountAsync(options, cancellationToken);
-            
+
             var response = movies.MapToResponse(options.Page, options.PageSize, totalCount);
-            
+
             return Ok(response);
         }
 
@@ -54,6 +55,7 @@ namespace Movies.Api.Controllers.V1
         [HttpGet(ApiEndpoints.Movies.Get)]
         [ProducesResponseType(typeof(MovieResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        // [ResponseCache(Duration = 30, VaryByHeader = "Accept, Accept-Encoding", Location = ResponseCacheLocation.Any)]
         public async Task<IActionResult> Get([FromRoute] string idOrSlug, CancellationToken cancellationToken)
         {
             var userId = HttpContext.GetUserId();
