@@ -9,6 +9,7 @@ using Movies.Api.Swagger;
 using Movies.Application;
 using Movies.Application.Database;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using Movies.Api.Health;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
@@ -63,10 +64,14 @@ builder.Services.AddApiVersioning(options =>
 //builder.Services.AddResponseCaching();
 
 builder.Services.AddControllers();
+builder.Services.AddHealthChecks().AddCheck<DatabaseHealthCheck>(DatabaseHealthCheck.Name);
+
 builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
 builder.Services.AddSwaggerGen(x => x.OperationFilter<SwaggerDefaultValues>());
+
 builder.Services.AddApplication();
 builder.Services.AddDatabase(config["Database:ConnectionString"]!);
+
 
 var app = builder.Build();
 
@@ -85,6 +90,7 @@ if (app.Environment.IsDevelopment())
     options.RoutePrefix = String.Empty;
 });
 }
+app.MapHealthChecks("_health");
 
 app.UseHttpsRedirection();
 
