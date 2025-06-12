@@ -1,5 +1,3 @@
-using System;
-using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Movies.Application.Database;
 
@@ -21,14 +19,14 @@ public class DatabaseHealthCheck : IHealthCheck
     {
         try
         {
-            _ = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
-
+            using var connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
             return HealthCheckResult.Healthy();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Database health check failed");
-            return HealthCheckResult.Unhealthy();
+            var errorMessage = "Database connectivity check failed";
+            _logger.LogError(ex, errorMessage);
+            return HealthCheckResult.Unhealthy(errorMessage, ex);
         }
     }
 }
