@@ -1,3 +1,4 @@
+using System.Data;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Movies.Application.Database;
 
@@ -20,6 +21,10 @@ public class DatabaseHealthCheck : IHealthCheck
         try
         {
             using var connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
+            using var command = connection.CreateCommand();
+            command.CommandText = "SELECT 1";
+            await using var reader = await ((dynamic)command).ExecuteReaderAsync(cancellationToken);
+            
             return HealthCheckResult.Healthy();
         }
         catch (Exception ex)
