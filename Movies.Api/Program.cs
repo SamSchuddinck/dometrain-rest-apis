@@ -64,6 +64,7 @@ builder.Services.AddApiVersioning(options =>
 //builder.Services.AddResponseCaching();
 
 builder.Services.AddControllers();
+
 builder.Services.AddHealthChecks().AddCheck<DatabaseHealthCheck>(DatabaseHealthCheck.Name);
 
 builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
@@ -80,22 +81,26 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI(options =>
-{
-    foreach (var description in app.DescribeApiVersions())
     {
-        options.SwaggerEndpoint(
-            $"/swagger/{description.GroupName}/swagger.json",
-            $"Movies API {description.ApiVersion}");
-    }
-    options.RoutePrefix = String.Empty;
-});
+        foreach (var description in app.DescribeApiVersions())
+        {
+            options.SwaggerEndpoint(
+                $"/swagger/{description.GroupName}/swagger.json",
+                $"Movies API {description.ApiVersion}");
+        }
+        options.RoutePrefix = String.Empty;
+    });
 }
+
 app.MapHealthChecks("_health");
 
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// app.UseCors()
+//app.UseResponseCaching();
 
 app.UseMiddleware<ValidationMappingMiddleware>();
 app.MapControllers();
