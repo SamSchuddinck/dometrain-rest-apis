@@ -11,6 +11,7 @@ using Movies.Application.Database;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Movies.Api.Health;
 using Movies.Api.Cache;
+using Movies.Api.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
@@ -41,7 +42,7 @@ builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy(AuthContstants.AdminUserPolicyName, policy =>
     {
-        policy.RequireClaim(AuthContstants.AdminUserClaimName, "true");
+        policy.AddRequirements(new AdminAuthRequirement(config["ApiKey"]!));
     });
 
     options.AddPolicy(AuthContstants.TrusterMemberPolicyName, policy =>
@@ -52,6 +53,8 @@ builder.Services.AddAuthorization(options =>
         );
     });
 });
+
+builder.Services.AddScoped<ApiKeyAuthFilter>();
 
 // Configure API Versioning
 builder.Services.AddApiVersioning(options =>
