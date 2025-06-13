@@ -1,7 +1,9 @@
 using System;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using Movies.Api.Auth;
+using Movies.Api.Cache;
 using Movies.Api.Mapping;
 using Movies.Application.Services;
 using Movies.Contracts.Requests;
@@ -14,9 +16,11 @@ namespace Movies.Api.Controllers.V1;
 public class RatingsController : ControllerBase
 {
     private readonly IRatingService _ratingService;
-    public RatingsController(IRatingService ratingService)
+    private readonly IOutputCacheStore _outputCacheStore;
+    public RatingsController(IRatingService ratingService, IOutputCacheStore outputCacheStore)
     {
         _ratingService = ratingService;
+        _outputCacheStore = outputCacheStore;
     }
 
     [Authorize]
@@ -26,9 +30,13 @@ public class RatingsController : ControllerBase
     public async Task<IActionResult> RateMovieAsync([FromRoute] Guid id, [FromBody] RatingRequest request, CancellationToken cancellationToken = default)
     {
         var userId = HttpContext.GetUserId();
-        return await _ratingService.RateMovieAsync(id, request.Rating, userId!.Value, cancellationToken)
-            ? Ok()
-            : NotFound();
+        var result = await _ratingService.RateMovieAsync(id, request.Rating, userId!.Value, cancellationToken);
+        if (!result)
+        {
+            return NotFound();
+        }
+        await _outputCacheStore.EvictByTagAsync(CacheConstants.MovieCacheTag, cancellationToken);
+        return Ok();
     }
 
     [Authorize]
@@ -39,7 +47,12 @@ public class RatingsController : ControllerBase
     {
         var userId = HttpContext.GetUserId();
         var result = await _ratingService.DeleteRatingAsync(id, userId!.Value, cancellationToken);
-        return result ? Ok() : NotFound();
+        if (!result)
+        {
+            return NotFound();
+        }
+        await _outputCacheStore.EvictByTagAsync(CacheConstants.MovieCacheTag, cancellationToken);
+        return Ok();
     }
 
     [Authorize]
@@ -52,7 +65,5 @@ public class RatingsController : ControllerBase
 
         var ratingsResponse = ratings.MapToResponse();
         return Ok(ratingsResponse);
-
     }
-
 }

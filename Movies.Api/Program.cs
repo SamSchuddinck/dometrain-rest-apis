@@ -10,6 +10,7 @@ using Movies.Application;
 using Movies.Application.Database;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Movies.Api.Health;
+using Movies.Api.Cache;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
@@ -65,12 +66,12 @@ builder.Services.AddApiVersioning(options =>
 builder.Services.AddOutputCache(options =>
 {
     options.AddBasePolicy(c => c.Cache());
-    options.AddPolicy("MovieCache", policy =>
+    options.AddPolicy(CacheConstants.MovieCachePolicy, policy =>
     {
         policy.Cache()
         .Expire(TimeSpan.FromMinutes(1))
-        .SetVaryByQuery(new[] { "title", "year", "sortBy", "page", "pageSize" })
-        .Tag("movies");
+        .SetVaryByQuery(CacheConstants.MovieCacheVaryByQueryParams)
+        .Tag(CacheConstants.MovieCacheTag);
     });
 });
 
