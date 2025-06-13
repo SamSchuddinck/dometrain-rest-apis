@@ -10,6 +10,7 @@ using Movies.Application;
 using Movies.Application.Database;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Movies.Api.Health;
+using Movies.Api.Cache;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
@@ -62,6 +63,17 @@ builder.Services.AddApiVersioning(options =>
 }).AddMvc().AddApiExplorer();
 
 //builder.Services.AddResponseCaching();
+builder.Services.AddOutputCache(options =>
+{
+    options.AddBasePolicy(c => c.Cache());
+    options.AddPolicy(CacheConstants.MovieCachePolicy, policy =>
+    {
+        policy.Cache()
+        .Expire(TimeSpan.FromMinutes(1))
+        .SetVaryByQuery(CacheConstants.MovieCacheVaryByQueryParams)
+        .Tag(CacheConstants.MovieCacheTag);
+    });
+});
 
 builder.Services.AddControllers();
 
@@ -101,6 +113,7 @@ app.UseAuthorization();
 
 // app.UseCors()
 //app.UseResponseCaching();
+app.UseOutputCache();
 
 app.UseMiddleware<ValidationMappingMiddleware>();
 app.MapControllers();
