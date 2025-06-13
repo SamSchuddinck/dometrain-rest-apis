@@ -101,6 +101,7 @@ namespace Movies.Api.Controllers.V1
         [HttpDelete(ApiEndpoints.Movies.Delete)]
         public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken cancellationToken)
         {
+            var userId = HttpContext.GetUserId();
             var deleted = await _movieService.DeleteByIdAsync(id, cancellationToken);
             if (!deleted)
             {
